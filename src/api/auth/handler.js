@@ -1,61 +1,39 @@
 const ClientError = require('../../exceptions/ClientError');
 const autoBind = require('auto-bind');
 
-class AlbumsHandler {
-  constructor(service, validator) {
-    this._service = service;
+class AuthHandler {
+  constructor(authService, usersService, tokenManager, validator) {
+    this._authenticationsService = authService;
+    this._usersService = usersService;
+    this._tokenManager = tokenManager;
     this._validator = validator;
 
     autoBind(this);
   }
 
-  async postAlbumHandler(request, h) {
+  async postAuthHandler(request, h) {
     try {
-      this._validator.validateAlbumPayload(request.payload);
-      const { name, year } = request.payload;
-      const album_id = await this._service.addAlbum({ name, year });
+      this._validator.validatePostAuthPayload(request.payload);
+
+      const { username, password } = request.payload;
+      const id = await this._usersService.verifyUserCredential(
+        username,
+        password
+      );
+      const accessToken = this._tokenManager.generateAccessToken({ id });
+      const refreshToken = this._tokenManager.generateRefreshToken({ id });
+
+      await this._authenticationsService.addRefreshToken(refreshToken);
 
       const response = h.response({
         status: 'success',
-        message: 'Album berhasil ditambahkan',
+        message: 'Authentication berhasil ditambahkan',
         data: {
-          albumId: album_id,
+          accessToken,
+          refreshToken,
         },
       });
       response.code(201);
-      return response;
-    } catch (error) {
-      if (error instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: error.message,
-        });
-        response.code(error.statusCode);
-        return response;
-      }
-
-      // Server Error
-      const response = h.response({
-        status: 'error',
-        message: 'Maaf, terjadi kegagalan pada server kami',
-      });
-      response.code(500);
-      console.error(error);
-      return response;
-    }
-  }
-
-  async getAlbumByIdHandler(request, h) {
-    try {
-      const { id } = request.params;
-      const res = await this._service.getAlbumById(id);
-      const response = h.response({
-        status: 'success',
-        data: {
-          album: res,
-        },
-      });
-      response.code(200);
       return response;
     } catch (error) {
       if (error instanceof ClientError) {
@@ -78,16 +56,21 @@ class AlbumsHandler {
     }
   }
 
-  async putAlbumByIdHandler(request, h) {
+  async putAuthHandler(request, h) {
     try {
-      this._validator.validateAlbumPayload(request.payload);
-      const { id } = request.params;
+      this._validator.validatePutAuthPayload(request.payload);
 
-      await this._service.editAlbumById(id, request.payload);
+      const { refreshToken } = request.payload;
+      await this._authenticationsService.verifyRefreshToken(refreshToken);
+      const { id } = this._tokenManager.verifyRefreshToken(refreshToken);
 
+      const accessToken = this._tokenManager.generateAccessToken({ id });
       return {
         status: 'success',
-        message: 'Album berhasil diperbarui',
+        message: 'Access Token berhasil diperbarui',
+        data: {
+          accessToken,
+        },
       };
     } catch (error) {
       if (error instanceof ClientError) {
@@ -110,13 +93,17 @@ class AlbumsHandler {
     }
   }
 
-  async deleteAlbumByIdHandler(request, h) {
+  async deleteAuthHandler(request, h) {
     try {
-      const { id } = request.params;
-      await this._service.deleteAlbumById(id);
+      this._validator.validateDeleteAuthPayload(request.payload);
+
+      const { refreshToken } = request.payload;
+      await this._authenticationsService.verifyRefreshToken(refreshToken);
+      await this._authenticationsService.deleteRefreshToken(refreshToken);
+
       return {
         status: 'success',
-        message: 'Album berhasil dihapus',
+        message: 'Refresh token berhasil dihapus',
       };
     } catch (error) {
       if (error instanceof ClientError) {
@@ -140,4 +127,4 @@ class AlbumsHandler {
   }
 }
 
-module.exports = AlbumsHandler;
+module.exports = AuthHandler;
