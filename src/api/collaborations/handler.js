@@ -15,7 +15,6 @@ class CollabHandler {
     const { playlistId, userId } = request.payload;
     const { id: credentialId } = request.auth.credentials;
 
-    await this._playlistsService.checkPlaylist(playlistId);
     await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
     await this._service.checkUserExist(userId);
 
@@ -36,7 +35,6 @@ class CollabHandler {
     const { playlistId, userId } = request.payload;
     const { id: credentialId } = request.auth.credentials;
 
-    await this._playlistsService.checkPlaylist(playlistId);
     await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
     await this._service.checkUserExist(userId);
 
