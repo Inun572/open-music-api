@@ -1,6 +1,4 @@
 const autoBind = require('auto-bind');
-const ClientError = require('../../exceptions/ClientError');
-const NotFoundError = require('../../exceptions/NotFoundError');
 
 class PlaylistsHandler {
   constructor(service, validator) {
@@ -29,6 +27,7 @@ class PlaylistsHandler {
 
   async getPlaylistsHandler(request, h) {
     const { id: credentialId } = request.auth.credentials;
+
     const playlists = await this._service.getPlaylists(credentialId);
 
     const response = h.response({
@@ -56,9 +55,12 @@ class PlaylistsHandler {
   async postSongToPlaylistHandler(request, h) {
     const { id: playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
-    await this._service.verifyPlaylistOwner(playlistId, credentialId);
-
     const { songId } = request.payload;
+
+    await this._service.checkPlaylist(playlistId);
+    await this._service.verifyPlaylistAccess(playlistId, credentialId);
+    await this._service.checkSong(songId);
+
     await this._service.addSongToPlaylist(playlistId, songId);
 
     const response = h.response({
@@ -72,12 +74,21 @@ class PlaylistsHandler {
   async getSongsFromPlaylistHandler(request, h) {
     const { id: playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
-    await this._service.verifyPlaylistOwner(playlistId, credentialId);
+    await this._service.verifyPlaylistAccess(playlistId, credentialId);
 
     const result = await this._service.getSongInPlaylist(playlistId);
 
-    const { playlist, songs } = result;
+    if (result.playlist.length > 0) {
+      const response = h.response({
+        status: 'success',
+        data: {
+          result,
+        },
+      });
+      return response;
+    }
 
+    const { playlist, songs } = result;
     const response = h.response({
       status: 'success',
       data: {
@@ -95,9 +106,9 @@ class PlaylistsHandler {
   async deleteSongFromPlaylistHandler(request, h) {
     const { id: playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
-    await this._service.verifyPlaylistOwner(playlistId, credentialId);
-
     const { songId } = request.payload;
+
+    await this._service.verifyPlaylistAccess(playlistId, credentialId);
     await this._service.deleteSongFromPlaylist(playlistId, songId);
 
     return {

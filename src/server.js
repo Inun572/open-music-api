@@ -1,5 +1,6 @@
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const ClientError = require('./exceptions/ClientError');
 
 const albums = require('./api/albums');
 const AlbumsService = require('./services/AlbumsService');
@@ -21,7 +22,10 @@ const AuthValidator = require('./validator/auth');
 const playlists = require('./api/playlists');
 const PlaylistsService = require('./services/PlaylistsService');
 const PlaylistsValidator = require('./validator/playlists');
-const ClientError = require('./exceptions/ClientError');
+
+const collaborations = require('./api/collaborations');
+const CollabService = require('./services/CollabService');
+const CollabValidator = require('./validator/collab/');
 
 require('dotenv').config();
 
@@ -30,7 +34,8 @@ const init = async () => {
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authService = new AuthService();
-  const playlistsService = new PlaylistsService();
+  const collabService = new CollabService();
+  const playlistsService = new PlaylistsService(collabService);
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -102,6 +107,14 @@ const init = async () => {
         validator: PlaylistsValidator,
       },
     },
+    {
+      plugin: collaborations,
+      options: {
+        playlistsService,
+        service: collabService,
+        validator: CollabValidator,
+      },
+    },
   ]);
 
   server.ext('onPreResponse', (request, h) => {
@@ -127,6 +140,7 @@ const init = async () => {
         message: 'terjadi kegagalan pada server kami',
       });
       newResponse.code(500);
+      console.log(newResponse);
       return newResponse;
     }
     // jika bukan error, lanjutkan dengan response sebelumnya (tanpa terintervensi)

@@ -2,11 +2,12 @@ const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
 const InvariantError = require('../exceptions/InvariantError');
 const NotFoundError = require('../exceptions/NotFoundError');
-const AuthenticationError = require('../exceptions/AuthError');
+const ForbiddenError = require('../exceptions/ForbiddenError');
 
 class PlaylistsService {
-  constructor() {
+  constructor(collabService) {
     this._pool = new Pool();
+    this._collabService = collabService;
   }
 
   async verifyPlaylistOwner(id, owner) {
@@ -19,11 +20,25 @@ class PlaylistsService {
     const playlist = result.rows[0];
 
     if (!playlist) {
-      throw new InvariantError('Playlist tidak ditemukan');
+      throw new NotFoundError('Playlist tidak ditemukan');
     }
-
     if (playlist.owner !== owner) {
-      throw new AuthenticationError('Akses ditolak');
+      throw new ForbiddenError('Akses dilarang');
+    }
+  }
+
+  async verifyPlaylistAccess(playlistId, userId) {
+    try {
+      await this.verifyPlaylistOwner(playlistId, userId);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      try {
+        await this._collabService.verifyCollaborations(playlistId, userId);
+      } catch {
+        throw error;
+      }
     }
   }
 
@@ -45,16 +60,16 @@ class PlaylistsService {
 
   async getPlaylists(owner) {
     const query = {
-      text: 'SELECT id, name, owner AS username FROM playlists WHERE owner = $1',
+      text: `SELECT p.id, p.name, u.username
+      FROM users u
+      JOIN playlists p ON u.id = p.owner
+      JOIN collaborations c ON p.id = c.playlist_id
+      WHERE p.owner = $1 OR c.user_id = $1`,
       values: [owner],
     };
 
     const result = await this._pool.query(query);
-
-    if (!result.rows.length) {
-      throw new InvariantError('Belum ada data playlist');
-    }
-
+    console.log(result.rows);
     return result.rows;
   }
 
@@ -85,7 +100,7 @@ class PlaylistsService {
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
-      throw new InvariantError('Playlist tidak ditemukan.');
+      throw new NotFoundError('Playlist tidak ditemukan.');
     }
   }
 
@@ -99,15 +114,11 @@ class PlaylistsService {
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
-      throw new InvariantError('Lagu tidak ditemukan.');
+      throw new NotFoundError('Lagu tidak ditemukan.');
     }
   }
 
   async addSongToPlaylist(playlistId, songId) {
-    // validasi playlist dan song
-    await this.checkPlaylist(playlistId);
-    await this.checkSong(songId);
-
     const id = `playlistsong-${nanoid(16)}`;
 
     const query = {
