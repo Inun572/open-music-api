@@ -51,7 +51,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new InvariantError('Gagal menambah playlist baru');
     }
 
@@ -80,7 +80,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError(
         'Gagal menghapus playlist, playlist tidak ditemukan'
       );
@@ -92,7 +92,7 @@ class PlaylistsService {
   // validasi song
   async checkSong(id) {
     console.log(typeof id);
-    if (typeof id != 'string') {
+    if (typeof id !== 'string') {
       throw new InvariantError('Input tidak valid');
     }
 
@@ -103,7 +103,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Lagu tidak ditemukan.');
     }
   }
@@ -118,7 +118,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new InvariantError('Kolaborasi gagal ditambahkan');
     }
 
@@ -132,7 +132,7 @@ class PlaylistsService {
     };
 
     const logResult = await this._pool.query(logQuery);
-    if (!logResult.rows.length) {
+    if (!logResult.rowCount) {
       console.log('gagal menyimpan log playlists');
     }
 
@@ -176,7 +176,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new InvariantError('Gagal menghapus lagu dari playlist');
     }
 
@@ -190,7 +190,7 @@ class PlaylistsService {
     };
 
     const logResult = await this._pool.query(logQuery);
-    if (!logResult.rows.length) {
+    if (!logResult.rowCount) {
       console.log('gagal menyimpan log playlists');
     }
 
@@ -209,7 +209,7 @@ class PlaylistsService {
     };
 
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new InvariantError('Gagal mendapatkan playlist activities');
     }
 

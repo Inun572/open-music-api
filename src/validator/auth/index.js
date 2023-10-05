@@ -1,30 +1,30 @@
 const {
   PostAuthPayloadSchema,
   PutAuthPayloadSchema,
-  DeleteAuthPayloadSchema,
-} = require('./schema');
+  DeleteAuthPayloadSchema
+} = require('./schema')
 
-const InvariantError = require('../../exceptions/InvariantError');
+const InvariantError = require('../../exceptions/InvariantError')
 
 const AuthValidator = {
   validatePostAuthPayload: (payload) => {
-    const validationResult = PostAuthPayloadSchema.validate(payload);
+    const validationResult = PostAuthPayloadSchema.validate(payload)
     if (validationResult.error) {
-      throw new InvariantError(validationResult.error.message);
+      throw new InvariantError(validationResult.error.message)
     }
   },
   validatePutAuthPayload: (payload) => {
-    const validationResult = PutAuthPayloadSchema.validate(payload);
+    const validationResult = PutAuthPayloadSchema.validate(payload)
     if (validationResult.error) {
-      throw new InvariantError(validationResult.error.message);
+      throw new InvariantError(validationResult.error.message)
     }
   },
   validateDeleteAuthPayload: (payload) => {
-    const validationResult = DeleteAuthPayloadSchema.validate(payload);
+    const validationResult = DeleteAuthPayloadSchema.validate(payload)
     if (validationResult.error) {
-      throw new InvariantError(validationResult.error.message);
+      throw new InvariantError(validationResult.error.message)
     }
-  },
-};
+  }
+}
 
-module.exports = AuthValidator;
+module.exports = AuthValidator

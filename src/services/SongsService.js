@@ -30,15 +30,15 @@ class SongsService {
       'SELECT id, title, performer FROM songs'
     );
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Belum ada data lagu');
     }
     return result.rows;
   }
 
   async getSongsWithParameter(title, performer) {
-    const q1 = title + '%';
-    const q2 = performer + '%';
+    const q1 = `${title}%`;
+    const q2 = `${performer}%`;
 
     const query1 = {
       text: 'SELECT id, title, performer FROM songs WHERE lower(title) like $1 OR lower(performer) like $2',
@@ -54,7 +54,7 @@ class SongsService {
         ? await this._pool.query(query2)
         : await this._pool.query(query1);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Belum ada data lagu');
     }
     return result.rows;
@@ -67,7 +67,7 @@ class SongsService {
     };
 
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Lagu tidak ditemukan');
     }
 
@@ -82,7 +82,7 @@ class SongsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Lagu tidak ditemukan, gagal menmgupdate lagu');
     }
 
@@ -97,7 +97,7 @@ class SongsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Lagu tidak ditemukan, gagal menghapus lagu');
     }
     return result.rows[0].id;

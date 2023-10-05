@@ -1,5 +1,5 @@
-const CollabHandler = require('./handler');
-const routes = require('./routes');
+const CollabHandler = require('./handler')
+const routes = require('./routes')
 
 module.exports = {
   name: 'collaborations',
@@ -9,7 +9,7 @@ module.exports = {
       playlistsService,
       service,
       validator
-    );
-    server.route(routes(collabHandler));
-  },
-};
+    )
+    server.route(routes(collabHandler))
+  }
+}

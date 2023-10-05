@@ -1,10 +1,10 @@
-const ClientError = require('./ClientError');
+const ClientError = require('./ClientError')
 
 class ForbiddenError extends ClientError {
-  constructor(message) {
-    super(message, 403);
-    this.name = 'ForbiddenError';
+  constructor (message) {
+    super(message, 403)
+    this.name = 'ForbiddenError'
   }
 }
 
-module.exports = ForbiddenError;
+module.exports = ForbiddenError

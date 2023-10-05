@@ -1,5 +1,3 @@
-const ClientError = require('../../exceptions/ClientError');
-const NotFoundError = require('../../exceptions/NotFoundError');
 const autoBind = require('auto-bind');
 
 class SongsHandler {
@@ -12,23 +10,14 @@ class SongsHandler {
 
   async postSongHandler(request, h) {
     this._validator.validateSongPayload(request.payload);
-    const { title, year, performer, genre, duration, albumId } =
-      request.payload;
 
-    const song_id = await this._service.addSong({
-      title,
-      year,
-      performer,
-      genre,
-      duration,
-      albumId,
-    });
+    const songId = await this._service.addSong(request.payload);
 
     const response = h.response({
       status: 'success',
       message: 'Lagu berhasil ditambahkan',
       data: {
-        songId: song_id,
+        songId,
       },
     });
     response.code(201);
@@ -45,7 +34,7 @@ class SongsHandler {
     const response = h.response({
       status: 'success',
       data: {
-        songs: songs,
+        songs,
       },
     });
     response.code(200);
@@ -58,14 +47,14 @@ class SongsHandler {
     const response = h.response({
       status: 'success',
       data: {
-        song: song,
+        song,
       },
     });
     response.code(200);
     return response;
   }
 
-  async putSongByIdHandler(request, h) {
+  async putSongByIdHandler(request) {
     this._validator.validateSongPayload(request.payload);
     const { id } = request.params;
 
@@ -77,7 +66,7 @@ class SongsHandler {
     };
   }
 
-  async deleteSongyIdHandler(request, h) {
+  async deleteSongyIdHandler(request) {
     const { id } = request.params;
 
     await this._service.deleteSongById(id);

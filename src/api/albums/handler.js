@@ -1,4 +1,3 @@
-const ClientError = require('../../exceptions/ClientError');
 const autoBind = require('auto-bind');
 
 class AlbumsHandler {
@@ -12,13 +11,13 @@ class AlbumsHandler {
   async postAlbumHandler(request, h) {
     this._validator.validateAlbumPayload(request.payload);
     const { name, year } = request.payload;
-    const album_id = await this._service.addAlbum({ name, year });
+    const albumId = await this._service.addAlbum({ name, year });
 
     const response = h.response({
       status: 'success',
       message: 'Album berhasil ditambahkan',
       data: {
-        albumId: album_id,
+        albumId,
       },
     });
     response.code(201);
@@ -38,7 +37,7 @@ class AlbumsHandler {
     return response;
   }
 
-  async putAlbumByIdHandler(request, h) {
+  async putAlbumByIdHandler(request) {
     this._validator.validateAlbumPayload(request.payload);
     const { id } = request.params;
 
@@ -50,7 +49,7 @@ class AlbumsHandler {
     };
   }
 
-  async deleteAlbumByIdHandler(request, h) {
+  async deleteAlbumByIdHandler(request) {
     const { id } = request.params;
     await this._service.deleteAlbumById(id);
     return {

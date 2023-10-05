@@ -1,7 +1,3 @@
-/* eslint-disable camelcase */
-
-exports.shorthands = undefined;
-
 exports.up = (pgm) => {
   pgm.addConstraint(
     'playlists_songs',
@@ -11,5 +7,5 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  pgm.dropConstraint('unique_playlist_id_and_song_id');
+  pgm.dropConstraint('playlists_songs', 'unique_playlist_id_and_song_id');
 };

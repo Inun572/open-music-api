@@ -1,14 +1,16 @@
-/* eslint-disable camelcase */
-
-exports.shorthands = undefined;
-
 exports.up = (pgm) => {
-  pgm.createTable('auth', {
-    token: {
-      type: 'TEXT',
-      notNull: true,
+  pgm.createTable(
+    'auth',
+    {
+      token: {
+        type: 'TEXT',
+        notNull: true,
+      },
     },
-  });
+    {
+      ifNotExists: true,
+    }
+  );
 };
 
 exports.down = (pgm) => {
