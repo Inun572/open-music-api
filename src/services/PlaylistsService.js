@@ -10,10 +10,10 @@ class PlaylistsService {
     this._collabService = collabService;
   }
 
-  async verifyPlaylistOwner(id, owner) {
+  async verifyPlaylistOwner(playlistId, userId) {
     const query = {
       text: 'SELECT * FROM playlists WHERE id = $1',
-      values: [id],
+      values: [playlistId],
     };
 
     const result = await this._pool.query(query);
@@ -22,7 +22,7 @@ class PlaylistsService {
     if (!playlist) {
       throw new NotFoundError('Playlist tidak ditemukan');
     }
-    if (playlist.owner !== owner) {
+    if (playlist.owner !== userId) {
       throw new ForbiddenError('Akses dilarang');
     }
   }
