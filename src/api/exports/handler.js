@@ -19,7 +19,7 @@ class ExportsHandler {
       targetEmail: request.payload.targetEmail,
     };
 
-    await this._playlistsService.verifyPlaylistAccess(playlistId, userId);
+    await this._playlistsService.verifyPlaylistOwner(playlistId, userId);
 
     await this._service.sendMessage('export:playlist', JSON.stringify(message));
 

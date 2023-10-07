@@ -46,9 +46,7 @@ class AlbumsService {
     const songs = songQuery.rows;
 
     return {
-      id: album.id,
-      name: album.name,
-      year: album.year,
+      album,
       songs,
     };
   }

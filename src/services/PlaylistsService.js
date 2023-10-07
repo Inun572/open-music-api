@@ -91,7 +91,6 @@ class PlaylistsService {
 
   // validasi song
   async checkSong(id) {
-    console.log(typeof id);
     if (typeof id !== 'string') {
       throw new InvariantError('Input tidak valid');
     }
