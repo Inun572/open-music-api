@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { Pool } = require('pg');
 const InvariantError = require('../../exceptions/InvariantError');
+const NotFoundError = require('../../exceptions/NotFoundError');
 
 class StorageService {
   constructor(folder) {
@@ -22,6 +23,19 @@ class StorageService {
       file.pipe(fileStream);
       file.on('end', () => resolve(filename));
     });
+  }
+
+  async checkAlbum(albumId) {
+    const query = {
+      text: 'SELECT id FROM albums WHERE id = $1',
+      values: [albumId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('Album tidak ditemukan');
+    }
   }
 
   async addAlbumCover(albumId, coverUrl) {

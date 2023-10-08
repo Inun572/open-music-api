@@ -8,6 +8,7 @@ const ClientError = require('./exceptions/ClientError');
 const albums = require('./api/albums');
 const AlbumsService = require('./services/AlbumsService');
 const AlbumsValidator = require('./validator/albums');
+const CacheService = require('./services/redis/CacheService');
 
 const songs = require('./api/songs');
 const SongsService = require('./services/SongsService');
@@ -41,7 +42,8 @@ const UploadsValidator = require('./validator/uploads');
 require('dotenv').config();
 
 const init = async () => {
-  const albumsService = new AlbumsService();
+  const cacheService = new CacheService();
+  const albumsService = new AlbumsService(cacheService);
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authService = new AuthService();
